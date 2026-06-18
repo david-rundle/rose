@@ -46,7 +46,7 @@ class RosePruneApp(BuiltinApp):
         if not suite_name:
             return
 
-        # Tar-gzip job logs on suite host
+        # Tar-gzip/Tar-zstd job logs on suite host
         # Prune job logs on remote hosts and suite host
         prune_remote_logs_cycles = self._get_conf(
             app_runner, conf_tree, "prune-remote-logs-at"

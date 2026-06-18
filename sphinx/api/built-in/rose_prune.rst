@@ -79,7 +79,7 @@ Example
 
    # archive (e.g. "tar") local log files from cycles one day or more before
    # the current cycle
-   # i.e. gzip cylc-run/<workflow>/<log>/<job>/<cycle>
+   # i.e. gzip/zstd/xz cylc-run/<workflow>/<log>/<job>/<cycle>
    archive-logs-at=-P1D
 
    # remove local log files from cycles 7 days or more before the current cycle

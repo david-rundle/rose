@@ -237,7 +237,8 @@ Arch Settings
 Some settings that can be used are described below. See the :ref:`rose_arch`
 documentation for more information:
 
-Above ``.tar`` was used to compress the file. However, ``compress=gzip``
+Above ``.tar`` was used to compress the file. However, ``compress=gzip``,
+``compress=zstd`` or ``compress=xz``
 can also be used. Note either of these commands can be used to compress a
 file or a folder/directory.
 

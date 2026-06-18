@@ -32,8 +32,7 @@ The application provides some useful functionalities:
   source files and the return code of archive command. In a retry, it
   would only redo targets that did not succeed in the previous attempts.
 * Rename source files.
-* Tar-Gzip or Gzip source files before sending them to the archive.
-
+* Tar-Gzip/Tar-Zstd or Gzip/Zstd source files before sending them to the archive.
 
 Invocation
 ----------
@@ -262,13 +261,13 @@ Configuration
          and ``%(target)s`` for substitution of the sources and the target
          respectively.
 
-      .. rose:conf:: compress=pax|tar|pax.gz|tar.gz|tgz|gz
+      .. rose:conf:: compress=pax|tar|pax.gz|tar.gz|tgz|gz|pax.zst|tar.zst|tzst|pax.xz|tar.xz|txz|zst|zstd|xz
 
          If specified, compress source files scheme before sending them to the
          archive. If not set Rose Arch will attempt to set a compression scheme
          if the file extension of the target implies compression: For
-         example, setting target as ``[arch:example.tar]`` is the same as
-         setting ``compress=tar``.
+         example, setting target as ``[arch:example.tar.gz]`` is the same as
+         setting ``compress=tar.gz``.
 
          Each compression scheme works slightly differently:
 
@@ -282,7 +281,21 @@ Configuration
          |``tar.gz`` or     |before being sent to the target.               |
          |``tgz``           |                                               |
          +------------------+-----------------------------------------------+
+         |``pax.zst``,      |Sources will be placed in a TAR-ZSTD file      |
+         |``tar.zst`` or    |before being sent to the target.               |
+         |``tzst``          |                                               |
+         +------------------+-----------------------------------------------+
+         |``pax.xz``,       |Sources will be placed in a TAR-XZ file        |
+         |``tar.xz`` or     |before being sent to the target.               |
+         |``txz``           |                                               |
+         +------------------+-----------------------------------------------+
          |``gz``            |Each source file will be compressed by GZIP    |
+         |                  |before being sent to the target.               |
+         +------------------+-----------------------------------------------+
+         |``zst`` or        |Each source file will be compressed by ZSTD    |
+         |``zstd``          |before being sent to the target.               |
+         +------------------+-----------------------------------------------+
+         |``xz``            |Each source file will be compressed by XZ      |
          |                  |before being sent to the target.               |
          +------------------+-----------------------------------------------+
 

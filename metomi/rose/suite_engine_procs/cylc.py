@@ -197,8 +197,14 @@ class CylcProcessor(SuiteEngineProcessor):
                 archive_file_name0 = os.path.join(
                     "log", "job-" + cycle + ".tar"
                 )
-                archive_file_name = archive_file_name0 + ".gz"
-                if os.path.exists(archive_file_name):
+                archive_file_name_gz = archive_file_name0 + ".gz"
+                archive_file_name_zst = archive_file_name0 + ".zst"
+                archive_file_name_xz = archive_file_name0 + ".xz"
+                if (
+                    os.path.exists(archive_file_name_gz)
+                    or os.path.exists(archive_file_name_zst)
+                    or os.path.exists(archive_file_name_xz)
+                ):
                     continue
                 glob_ = os.path.join(cycle, "*", "*", "*")
                 names = glob(os.path.join("log", "job", glob_))
@@ -212,8 +218,50 @@ class CylcProcessor(SuiteEngineProcessor):
                         continue
                     tar.add(name, name.replace("log/", "", 1))
                 tar.close()
-                # N.B. Python's gzip is slow
-                self.popen.run_simple("gzip", "-f", archive_file_name0)
+                use_zstd = False
+                try:
+                    from compression import zstd
+                    use_zstd = True
+                except ImportError:
+                    try:
+                        import zstd
+                        use_zstd = True
+                    except ImportError:
+                        try:
+                            import zstandard
+                            use_zstd = True
+                        except ImportError:
+                            try:
+                                ret_code, _, _ = self.popen.run("zstd", "--version")
+                                if ret_code == 0:
+                                    use_zstd = True
+                            except Exception:
+                                pass
+                if use_zstd:
+                    archive_file_name = archive_file_name0 + ".zst"
+                    try:
+                        try:
+                            from compression import zstd
+                            compress_func = zstd.compress
+                        except ImportError:
+                            try:
+                                import zstd
+                                compress_func = zstd.compress
+                            except ImportError:
+                                import zstandard
+                                compress_func = zstandard.ZstdCompressor().compress
+                        with open(archive_file_name0, "rb") as f_in:
+                            data = f_in.read()
+                        compressed_data = compress_func(data)
+                        with open(archive_file_name, "wb") as f_out:
+                            f_out.write(compressed_data)
+                        os.remove(archive_file_name0)
+                    except ImportError:
+                        self.popen.run_simple("zstd", "-f", "--rm", archive_file_name0)
+                else:
+                    archive_file_name = archive_file_name0 + ".gz"
+                    # N.B. Python's gzip is slow
+                    self.popen.run_simple("gzip", "-f", archive_file_name0)
                 self.handle_event(
                     FileSystemEvent(FileSystemEvent.CREATE, archive_file_name)
                 )
@@ -362,12 +410,12 @@ class CylcProcessor(SuiteEngineProcessor):
         self.fs_util.chdir(self.get_suite_dir(suite_name))
         try:
             for cycle in cycles:
-                # tar.gz files
-                archive_file_name = os.path.join(
-                    "log", "job-" + cycle + ".tar.gz"
-                )
-                if os.path.exists(archive_file_name):
-                    self.fs_util.delete(archive_file_name)
+                for ext in [".tar.gz", ".tar.zst", ".tar.xz"]:
+                    archive_file_name = os.path.join(
+                        "log", "job-" + cycle + ext
+                    )
+                    if os.path.exists(archive_file_name):
+                        self.fs_util.delete(archive_file_name)
                 # cycle directories
                 dir_name_prefix = os.path.join("log", "job")
                 dir_name = os.path.join(dir_name_prefix, cycle)
