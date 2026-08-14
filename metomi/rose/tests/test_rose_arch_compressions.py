@@ -252,6 +252,6 @@ def test_tar_compress_sources_scenarios(mock_app_runner, tmp_path, scheme, scena
         elif scenario == "zstd":
             assert content.startswith(b"COMPRESSED_BY_ZSTD:")
         elif scenario == "zstandard":
-            assert content.startswith(b"COMPRESSED_BY_STANDARD:" or b"COMPRESSED_BY_ZSTANDARD:")
+            assert content.startswith(b"COMPRESSED_BY_ZSTANDARD:")
         elif scenario == "lzma":
             assert content.startswith(b"COMPRESSED_BY_LZMA:")
